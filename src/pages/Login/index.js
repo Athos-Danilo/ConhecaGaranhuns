@@ -21,8 +21,8 @@ WebBrowser.maybeCompleteAuthSession();
 
 const { width, height } = Dimensions.get('window');
 
-// Substitua pelo seu Web Client ID do Google Cloud Console quando disponível
-const GOOGLE_WEB_CLIENT_ID = "1060117832305-webclientid.apps.googleusercontent.com";
+// Client ID oficial do Google Cloud gerado no Firebase
+const GOOGLE_WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || "1060117832305-n3q3ql4avb4g0c6glvgpodjm6co5lk2m.apps.googleusercontent.com";
 
 export default function Login() {
   const [loading, setLoading] = useState(false);
@@ -49,15 +49,6 @@ export default function Login() {
   }, [response]);
 
   const handleGoogleLogin = async () => {
-    // Se o Client ID ainda for o padrão/exemplo, avisa o usuário
-    if (GOOGLE_WEB_CLIENT_ID.includes("webclientid")) {
-      Alert.alert(
-        "Configuração do Google Cloud", 
-        "Para abrir a tela oficial do Google no seu celular, precisamos do seu 'Client ID' do Google Cloud. Copie o ID da sua conta e cole no arquivo firebase.js ou nos avise!"
-      );
-      return;
-    }
-
     try {
       setLoading(true);
       await promptAsync();
