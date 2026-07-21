@@ -1,37 +1,46 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { ActivityIndicator, View } from 'react-native';
+import { AuthProvider, useAuth } from './src/contexts/AuthContext';
+
 import Home from './src/pages/Home';
 import Details from './src/pages/Details';
+import Login from './src/pages/Login';
 
 const Stack = createNativeStackNavigator();
 
+function AppRoutes() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' }}>
+        <ActivityIndicator size="large" color="#5D8878" />
+      </View>
+    );
+  }
+
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {user ? (
+        <>
+          <Stack.Screen name="Home" component={Home} />
+          <Stack.Screen name="Details" component={Details} />
+        </>
+      ) : (
+        <Stack.Screen name="Login" component={Login} />
+      )}
+    </Stack.Navigator>
+  );
+}
+
 export default function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName="Home"
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: '#2E8B57', // Verde mais premium e diferente do padrão
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      >
-        <Stack.Screen 
-          name="Home" 
-          component={Home} 
-          options={{ title: 'Conheça Garanhuns' }} 
-        />
-        <Stack.Screen 
-          name="Details" 
-          component={Details} 
-          options={{ title: 'Detalhes do Local' }} 
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <AuthProvider>
+      <NavigationContainer>
+        <AppRoutes />
+      </NavigationContainer>
+    </AuthProvider>
   );
 }
