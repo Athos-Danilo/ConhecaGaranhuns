@@ -1,15 +1,72 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions, StatusBar, Alert } from 'react-native';
-import Animated, { FadeInDown, withTiming, useSharedValue, useAnimatedStyle, Easing } from 'react-native-reanimated';
+import React, { useState, useEffect } from 'react';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  TouchableOpacity, 
+  Image, 
+  Dimensions, 
+  StatusBar, 
+  Alert, 
+  ActivityIndicator 
+} from 'react-native';
+import Animated, { FadeInDown, Easing } from 'react-native-reanimated';
+import * as WebBrowser from 'expo-web-browser';
+import * as Google from 'expo-auth-session/providers/google';
+import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
+import { auth } from '../../config/firebase';
+
+// Habilita a finalização da sessão no navegador do Expo Go
+WebBrowser.maybeCompleteAuthSession();
 
 const { width, height } = Dimensions.get('window');
 
+// Substitua pelo seu Web Client ID do Google Cloud Console quando disponível
+const GOOGLE_WEB_CLIENT_ID = "1060117832305-webclientid.apps.googleusercontent.com";
+
 export default function Login() {
-  const handleGoogleLogin = () => {
-    Alert.alert(
-      "Quase lá!", 
-      "A interface está pronta! Para o login real com o Google abrir, precisaremos gerar uma chave (Client ID) lá no painel do Google Cloud. Te explico no chat!"
-    );
+  const [loading, setLoading] = useState(false);
+
+  // Hook oficial do Expo para Google OAuth
+  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+    clientId: GOOGLE_WEB_CLIENT_ID,
+  });
+
+  // Trata a resposta do Google OAuth quando o usuário retorna do popup
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const { id_token } = response.params;
+      const credential = GoogleAuthProvider.credential(id_token);
+      
+      setLoading(true);
+      signInWithCredential(auth, credential)
+        .catch((error) => {
+          console.error("Erro ao autenticar com Firebase:", error);
+          Alert.alert("Erro de Autenticação", "Não foi possível concluir o login com o Google.");
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [response]);
+
+  const handleGoogleLogin = async () => {
+    // Se o Client ID ainda for o padrão/exemplo, avisa o usuário
+    if (GOOGLE_WEB_CLIENT_ID.includes("webclientid")) {
+      Alert.alert(
+        "Configuração do Google Cloud", 
+        "Para abrir a tela oficial do Google no seu celular, precisamos do seu 'Client ID' do Google Cloud. Copie o ID da sua conta e cole no arquivo firebase.js ou nos avise!"
+      );
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await promptAsync();
+    } catch (error) {
+      console.error("Erro ao abrir o login do Google:", error);
+      Alert.alert("Erro", "Falha ao iniciar o login com o Google.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -26,7 +83,7 @@ export default function Login() {
         <View style={styles.overlay} />
       </View>
 
-      {/* Painel Inferior (Bottom Sheet) com animação fluida (sem tremedeira) */}
+      {/* Painel Inferior (Bottom Sheet) com animação fluida */}
       <Animated.View 
         entering={FadeInDown.duration(800).easing(Easing.out(Easing.cubic))}
         style={styles.bottomSheet}
@@ -41,14 +98,21 @@ export default function Login() {
           style={styles.googleButton} 
           activeOpacity={0.8}
           onPress={handleGoogleLogin}
+          disabled={loading}
         >
-          <View style={styles.googleIconContainer}>
-            <Image 
-              source={{ uri: 'https://developers.google.com/identity/images/g-logo.png' }} 
-              style={styles.googleImage} 
-            />
-          </View>
-          <Text style={styles.googleButtonText}>Continuar com o Google</Text>
+          {loading ? (
+            <ActivityIndicator size="small" color="#0B3338" style={{ width: '100%' }} />
+          ) : (
+            <>
+              <View style={styles.googleIconContainer}>
+                <Image 
+                  source={{ uri: 'https://developers.google.com/identity/images/g-logo.png' }} 
+                  style={styles.googleImage} 
+                />
+              </View>
+              <Text style={styles.googleButtonText}>Continuar com o Google</Text>
+            </>
+          )}
         </TouchableOpacity>
 
         {/* Texto de rodapé */}
@@ -67,7 +131,7 @@ const styles = StyleSheet.create({
   },
   imageWrapper: {
     width: '100%',
-    height: height * 0.65, // Preenche todo o topo até encontrar o Bottom Sheet
+    height: height * 0.65,
     overflow: 'hidden',
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
@@ -78,7 +142,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(11, 51, 56, 0.15)', // Dark Green mais sutil para não escurecer tanto
+    backgroundColor: 'rgba(11, 51, 56, 0.15)',
   },
   bottomSheet: {
     position: 'absolute',
@@ -151,7 +215,7 @@ const styles = StyleSheet.create({
     color: '#0B3338', 
     flex: 1,
     textAlign: 'center',
-    marginRight: 39, // Ajustado para manter centralizado
+    marginRight: 39,
   },
   footerText: {
     fontSize: 12,
