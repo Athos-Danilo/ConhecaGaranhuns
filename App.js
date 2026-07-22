@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ActivityIndicator, View } from 'react-native';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 
+import Welcome from './src/pages/Welcome';
 import Home from './src/pages/Home';
 import Details from './src/pages/Details';
 import Login from './src/pages/Login';
@@ -25,6 +26,7 @@ function AppRoutes() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {user ? (
         <>
+          <Stack.Screen name="Welcome" component={Welcome} />
           <Stack.Screen name="Home" component={Home} />
           <Stack.Screen name="Details" component={Details} />
         </>
