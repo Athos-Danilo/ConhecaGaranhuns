@@ -13,6 +13,7 @@ import {
 import Animated, { FadeInDown, Easing } from 'react-native-reanimated';
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
+import { makeRedirectUri } from 'expo-auth-session';
 import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import { auth } from '../../config/firebase';
 
@@ -27,9 +28,10 @@ const GOOGLE_WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || "10
 export default function Login() {
   const [loading, setLoading] = useState(false);
 
-  // Hook oficial do Expo para Google OAuth
+  // Hook oficial do Expo para Google OAuth com redirectUri explícito
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
     clientId: GOOGLE_WEB_CLIENT_ID,
+    redirectUri: makeRedirectUri(),
   });
 
   // Trata a resposta do Google OAuth quando o usuário retorna do popup
