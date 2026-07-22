@@ -49,12 +49,11 @@ export default function Welcome() {
     const checkWelcome = async () => {
       try {
         const hasSeen = await AsyncStorage.getItem('@hasSeenWelcome');
-        // --- MODO DE TESTE ATIVADO ---
-        // if (hasSeen === 'true') {
-        //   navigation.replace('Home');
-        // } else {
+        if (hasSeen === 'true') {
+          navigation.replace('WelcomeBack');
+        } else {
           setIsChecking(false);
-        // }
+        }
       } catch (error) {
         setIsChecking(false);
       }

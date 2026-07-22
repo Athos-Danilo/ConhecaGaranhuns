@@ -5,6 +5,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 
 import Welcome from './src/pages/Welcome';
+import WelcomeBack from './src/pages/WelcomeBack';
 import Home from './src/pages/Home';
 import Details from './src/pages/Details';
 import Login from './src/pages/Login';
@@ -27,6 +28,7 @@ function AppRoutes() {
       {user ? (
         <>
           <Stack.Screen name="Welcome" component={Welcome} />
+          <Stack.Screen name="WelcomeBack" component={WelcomeBack} />
           <Stack.Screen name="Home" component={Home} />
           <Stack.Screen name="Details" component={Details} />
         </>
